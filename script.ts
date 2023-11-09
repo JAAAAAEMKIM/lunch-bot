@@ -7,7 +7,7 @@ set_fs(fs);
 const TOKEN = "ajjt1imxmtj4:AlEKb1O3ROuFsaTK8G287w";
 const API_URL = "https://api.dooray.com/messenger/v1/channels/direct-send";
 const CHANNEL_API_URL =
-  "https://api.dooray.com/messenger/v1/channels/3013654474402086458/logs";
+  "https://api.dooray.com/messenger/v1/channels/3667760352443345772/logs";
 const USER_ID = "2914472305406725889";
 const FILE_NAME = "lunch.xlsx";
 
@@ -57,28 +57,41 @@ const getMenusOfDay = (sheet: WorkSheet, day: number) => {
   const rows = Object.keys(sheet)
     .map((key) => Number(key.substring(1)))
     .filter((x) => !isNaN(x));
-  const maxRow = Math.max(...rows);
-  let row = 5;
+
+  const categories = Object.keys(sheet).filter((key) => key.startsWith("B"));
+  const lunchIdx = Number(
+    categories.find((c) => sheet[c]?.v === "점심")?.substring(1)
+  );
+  const dinnerIdx = Number(
+    categories.find((c) => sheet[c]?.v === "저녁")?.substring(1)
+  );
+
+  if (!lunchIdx || !dinnerIdx) return [];
+  let row = lunchIdx;
   let dataKey = `${column}${row}`;
-  while (row < maxRow) {
+  while (row < dinnerIdx) {
     if (sheet[dataKey]) {
       const data = sheet[dataKey]["v"];
-      menus.push(data);
       if (typeof data === "number") {
-        menus.push(" ");
+        menus.push(`${data} kcal\n`);
+      } else {
+        menus.push(data);
       }
     }
     row += 1;
     dataKey = `${column}${row}`;
   }
 
-  console.log(menus);
-
   return menus.filter(Boolean);
 };
 
 const getTextContent = (sheet: WorkSheet, day: number) => {
-  return getMenusOfDay(sheet, day).join("\n");
+  const date = new Date();
+  const month = date.getMonth() + 1;
+  const dateNumber = date.getDate();
+
+  return `${month}/${dateNumber} - 오늘의 점심 메뉴\n
+${getMenusOfDay(sheet, day).join("\n")}`;
 };
 
 const start = async () => {

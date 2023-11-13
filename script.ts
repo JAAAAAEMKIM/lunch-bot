@@ -17,12 +17,30 @@ const MODE = {
 } as const;
 type MODE = (typeof MODE)[keyof typeof MODE];
 
-const sendMessage = async (
-  text: string,
-  organizationMemberId: string,
-  mode: MODE = MODE.NORMAL
-) => {
-  const url = mode === MODE.NORMAL ? API_URL : CHANNEL_API_URL;
+const MEAL = {
+  DINNER: "dinner",
+  LUNCH: "lunch",
+} as const;
+type MEAL = (typeof MEAL)[keyof typeof MEAL];
+
+type STATE = {
+  isDev: boolean;
+  mode: MODE;
+  meal: MEAL;
+};
+const state: STATE = {
+  isDev: false,
+  mode: MODE.CHANNEL,
+  meal: MEAL.LUNCH,
+};
+
+const sendMessage = async (text: string, organizationMemberId: string) => {
+  const url = state.mode === MODE.NORMAL ? API_URL : CHANNEL_API_URL;
+  if (state.isDev) {
+    console.log(text);
+    return text;
+  }
+
   const result = await fetch(url, {
     method: "POST",
     headers: {
@@ -46,6 +64,9 @@ const readXlsx = () => {
 
 const getToday = () => {
   const date = new Date();
+  if (date.getDay() === 0) {
+    return 7;
+  }
   return date.getDay() - 1;
 };
 
@@ -67,9 +88,12 @@ const getMenusOfDay = (sheet: WorkSheet, day: number) => {
   );
 
   if (!lunchIdx || !dinnerIdx) return [];
-  let row = lunchIdx;
+  const start = state.meal === MEAL.LUNCH ? lunchIdx : dinnerIdx;
+  const end = state.meal === MEAL.LUNCH ? dinnerIdx : rows[rows.length - 1];
+
+  let row = start;
   let dataKey = `${column}${row}`;
-  while (row < dinnerIdx) {
+  while (row < end) {
     if (sheet[dataKey]) {
       const data = sheet[dataKey]["v"];
       if (typeof data === "number") {
@@ -89,17 +113,33 @@ const getTextContent = (sheet: WorkSheet, day: number) => {
   const date = new Date();
   const month = date.getMonth() + 1;
   const dateNumber = date.getDate();
+  const title =
+    state.meal === MEAL.LUNCH ? "오늘의 점심 메뉴" : "오늘의 저녁 메뉴";
 
-  return `${month}/${dateNumber} - 오늘의 점심 메뉴\n
+  return `${month}/${dateNumber} - ${title}\n
 ${getMenusOfDay(sheet, day).join("\n")}`;
 };
 
 const start = async () => {
-  const today = getToday();
-  if (today > 4) return;
+  const flags = Bun.argv.slice(2);
+  state.isDev = Boolean(flags.find((f) => f === "--dev")) || false;
+  state.meal = Boolean(flags.find((f) => f === "--dinner"))
+    ? MEAL.DINNER
+    : MEAL.LUNCH;
+  state.mode = Boolean(flags.find((f) => f === "--normal"))
+    ? MODE.NORMAL
+    : MODE.CHANNEL;
+
+  // const today = getToday();
+  const today = 1;
+
+  if (today > 4) {
+    console.log("weekend");
+    return;
+  }
   const sheet = readXlsx();
   const message = getTextContent(sheet, today);
-  await sendMessage(message, USER_ID, "channel");
+  await sendMessage(message, USER_ID);
   console.log("END");
 };
 

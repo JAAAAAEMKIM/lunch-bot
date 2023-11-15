@@ -10,10 +10,13 @@ const CHANNEL_API_URL =
   "https://api.dooray.com/messenger/v1/channels/3667760352443345772/logs";
 const USER_ID = "2914472305406725889";
 const FILE_NAME = "lunch.xlsx";
+const BOT_API_URL =
+  "https://hook.dooray.com/services/3036349505739914786/3671781334191004776/uMh3AktTSbKWyyBvzaO4FA";
 
 const MODE = {
   NORMAL: "normal",
   CHANNEL: "channel",
+  BOT: "bot",
 } as const;
 type MODE = (typeof MODE)[keyof typeof MODE];
 
@@ -35,12 +38,27 @@ const state: STATE = {
 };
 
 const sendMessage = async (text: string, organizationMemberId: string) => {
-  const url = state.mode === MODE.NORMAL ? API_URL : CHANNEL_API_URL;
   if (state.isDev) {
     console.log(text);
     return text;
   }
 
+  if (state.mode === MODE.BOT) {
+    const result = await fetch(BOT_API_URL, {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+      },
+      body: JSON.stringify({
+        botName: "밥먹으러 갈까요🍚",
+        text,
+      }),
+    });
+
+    return result.json();
+  }
+
+  const url = state.mode === MODE.NORMAL ? API_URL : CHANNEL_API_URL;
   const result = await fetch(url, {
     method: "POST",
     headers: {
@@ -128,6 +146,8 @@ const start = async () => {
     : MEAL.LUNCH;
   state.mode = Boolean(flags.find((f) => f === "--normal"))
     ? MODE.NORMAL
+    : Boolean(flags.find((f) => f === "--bot"))
+    ? MODE.BOT
     : MODE.CHANNEL;
 
   const today = getToday();

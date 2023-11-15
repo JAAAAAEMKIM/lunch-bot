@@ -130,8 +130,8 @@ const start = async () => {
     ? MODE.NORMAL
     : MODE.CHANNEL;
 
-  // const today = getToday();
-  const today = 1;
+  const today = getToday();
+  // const today = 1;
 
   if (today > 4) {
     console.log("weekend");

@@ -1,24 +1,28 @@
-import { WorkSheet, readFile, set_fs } from "xlsx";
-import { join } from "path";
-import * as fs from "fs";
+import FileRepository from "./src/FileRepository";
+//
+// const TOKEN = "ajjt1imxmtj4:AlEKb1O3ROuFsaTK8G287w";
+// const API_URL = "https://api.dooray.com/messenger/v1/channels/direct-send";
+// const CHANNEL_API_URL =
+//   "https://api.dooray.com/messenger/v1/channels/3667760352443345772/logs";
 
-set_fs(fs);
+// Menu
+const BOT_API_URL_2 =
+  "https://hook.dooray.com/services/3036349505739914786/3671121977471694703/jjLrDwA7TciUrZ4PUvTAiA";
 
-const TOKEN = "ajjt1imxmtj4:AlEKb1O3ROuFsaTK8G287w";
-const API_URL = "https://api.dooray.com/messenger/v1/channels/direct-send";
-const CHANNEL_API_URL =
-  "https://api.dooray.com/messenger/v1/channels/3667760352443345772/logs";
-const USER_ID = "2914472305406725889";
-const FILE_NAME = "lunch.xlsx";
+// FE
 const BOT_API_URL =
   "https://hook.dooray.com/services/3036349505739914786/3671781334191004776/uMh3AktTSbKWyyBvzaO4FA";
 
-const MODE = {
-  NORMAL: "normal",
-  CHANNEL: "channel",
-  BOT: "bot",
-} as const;
-type MODE = (typeof MODE)[keyof typeof MODE];
+// ME
+const BOT_API_URL_TEST =
+  "https://hook.dooray.com/services/1387695619080878080/2945758919024115073/vQ5K1tziTmCMf1282uvycg";
+
+// const MODE = {
+//   NORMAL: "normal",
+//   CHANNEL: "channel",
+//   BOT: "bot",
+// } as const;
+// type MODE = (typeof MODE)[keyof typeof MODE];
 
 const MEAL = {
   DINNER: "dinner",
@@ -28,56 +32,39 @@ type MEAL = (typeof MEAL)[keyof typeof MEAL];
 
 type STATE = {
   isDev: boolean;
-  mode: MODE;
+  channel: 1 | 2;
   meal: MEAL;
 };
 const state: STATE = {
   isDev: false,
-  mode: MODE.CHANNEL,
   meal: MEAL.LUNCH,
+  channel: 1,
 };
 
-const sendMessage = async (text: string, organizationMemberId: string) => {
-  if (state.isDev) {
-    console.log(text);
-    return text;
-  }
+const sendMessage = async (text: string) => {
+  // if (state.isDev) {
+  //   console.log(text);
+  //   return text;
+  // }
 
-  if (state.mode === MODE.BOT) {
-    const result = await fetch(BOT_API_URL, {
-      method: "POST",
-      headers: {
-        "Content-Type": "application/json",
-      },
-      body: JSON.stringify({
-        botName: "밥먹으러 갈까요🍚",
-        text,
-      }),
-    });
+  const url = state.isDev
+    ? BOT_API_URL_TEST
+    : state.channel === 1
+      ? BOT_API_URL
+      : BOT_API_URL_2;
 
-    return result.json();
-  }
-
-  const url = state.mode === MODE.NORMAL ? API_URL : CHANNEL_API_URL;
   const result = await fetch(url, {
     method: "POST",
     headers: {
-      Authorization: `dooray-api ${TOKEN}`,
       "Content-Type": "application/json",
     },
     body: JSON.stringify({
+      botName: "밥먹으러 갈까요🍚",
       text,
-      organizationMemberId,
     }),
   });
 
   return result.json();
-};
-
-const readXlsx = () => {
-  const workbook = readFile(join(import.meta.dir, FILE_NAME));
-  const sheet = workbook.Sheets[workbook.SheetNames[1]];
-  return sheet;
 };
 
 const getToday = () => {
@@ -88,46 +75,7 @@ const getToday = () => {
   return date.getDay() - 1;
 };
 
-const getDayColumn = (dayIdx: number) => ["D", "E", "F", "G", "H"][dayIdx];
-
-const getMenusOfDay = (sheet: WorkSheet, day: number) => {
-  const menus = [];
-  const column = getDayColumn(day);
-  const rows = Object.keys(sheet)
-    .map((key) => Number(key.substring(1)))
-    .filter((x) => !isNaN(x));
-
-  const categories = Object.keys(sheet).filter((key) => key.startsWith("B"));
-  const lunchIdx = Number(
-    categories.find((c) => sheet[c]?.v === "점심")?.substring(1)
-  );
-  const dinnerIdx = Number(
-    categories.find((c) => sheet[c]?.v === "저녁")?.substring(1)
-  );
-
-  if (!lunchIdx || !dinnerIdx) return [];
-  const start = state.meal === MEAL.LUNCH ? lunchIdx : dinnerIdx;
-  const end = state.meal === MEAL.LUNCH ? dinnerIdx : rows[rows.length - 1];
-
-  let row = start;
-  let dataKey = `${column}${row}`;
-  while (row < end) {
-    if (sheet[dataKey]) {
-      const data = sheet[dataKey]["v"];
-      if (typeof data === "number") {
-        menus.push(`${data} kcal\n`);
-      } else {
-        menus.push(data);
-      }
-    }
-    row += 1;
-    dataKey = `${column}${row}`;
-  }
-
-  return menus.filter(Boolean);
-};
-
-const getTextContent = (sheet: WorkSheet, day: number) => {
+const getTextContent = (meal: string[], day: number) => {
   const date = new Date();
   const month = date.getMonth() + 1;
   const dateNumber = date.getDate();
@@ -135,7 +83,7 @@ const getTextContent = (sheet: WorkSheet, day: number) => {
     state.meal === MEAL.LUNCH ? "오늘의 점심 메뉴" : "오늘의 저녁 메뉴";
 
   return `${month}/${dateNumber} - ${title}\n
-${getMenusOfDay(sheet, day).join("\n")}`;
+${meal.join("\n")}`;
 };
 
 const start = async () => {
@@ -144,11 +92,12 @@ const start = async () => {
   state.meal = Boolean(flags.find((f) => f === "--dinner"))
     ? MEAL.DINNER
     : MEAL.LUNCH;
-  state.mode = Boolean(flags.find((f) => f === "--normal"))
-    ? MODE.NORMAL
-    : Boolean(flags.find((f) => f === "--bot"))
-    ? MODE.BOT
-    : MODE.CHANNEL;
+  // state.mode = Boolean(flags.find((f) => f === "--normal"))
+  //   ? MODE.NORMAL
+  //   : Boolean(flags.find((f) => f === "--bot"))
+  //     ? MODE.BOT
+  //     : MODE.CHANNEL;
+  state.channel = Boolean(flags.find((f) => f === "--chan2")) ? 2 : 1;
 
   const today = getToday();
   // const today = 1;
@@ -157,9 +106,14 @@ const start = async () => {
     console.log("weekend");
     return;
   }
-  const sheet = readXlsx();
-  const message = getTextContent(sheet, today);
-  await sendMessage(message, USER_ID);
+  const mealData = FileRepository();
+  const meal =
+    state.meal === MEAL.LUNCH
+      ? mealData.getLunch(today)
+      : mealData.getDinner(today);
+  const message = getTextContent(meal, today);
+  await sendMessage(message);
+  console.log(message);
   console.log("END");
 };
 

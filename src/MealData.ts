@@ -1,18 +1,32 @@
-type Data = {
-  [key: number]: [string[], string[]];
+type MealPlan = {
+  lunch: Course[];
+  dinner: Course[];
+};
+
+export type Course = {
+  label: string;
+  menus: Menu[];
+  calories?: number;
+  concept?: string;
+};
+
+type Menu = string;
+
+export type WeeklyData = {
+  [key: number]: MealPlan;
 };
 
 class MealData {
-  data: Data;
-  constructor(data: Data) {
+  data: WeeklyData;
+  constructor(data: WeeklyData) {
     this.data = data;
   }
   getLunch(dayIdx: number) {
-    return this.data[dayIdx][0];
+    return this.data[dayIdx].lunch;
   }
 
   getDinner(dayIdx: number) {
-    return this.data[dayIdx][1];
+    return this.data[dayIdx].dinner;
   }
 }
 

@@ -1,9 +1,5 @@
 import FileRepository from "./src/FileRepository";
-//
-// const TOKEN = "ajjt1imxmtj4:AlEKb1O3ROuFsaTK8G287w";
-// const API_URL = "https://api.dooray.com/messenger/v1/channels/direct-send";
-// const CHANNEL_API_URL =
-//   "https://api.dooray.com/messenger/v1/channels/3667760352443345772/logs";
+import { Course } from "./src/MealData";
 
 // Menu
 const BOT_API_URL_2 =
@@ -16,13 +12,6 @@ const BOT_API_URL =
 // ME
 const BOT_API_URL_TEST =
   "https://hook.dooray.com/services/1387695619080878080/2945758919024115073/vQ5K1tziTmCMf1282uvycg";
-
-// const MODE = {
-//   NORMAL: "normal",
-//   CHANNEL: "channel",
-//   BOT: "bot",
-// } as const;
-// type MODE = (typeof MODE)[keyof typeof MODE];
 
 const MEAL = {
   DINNER: "dinner",
@@ -41,11 +30,16 @@ const state: STATE = {
   channel: 1,
 };
 
-const sendMessage = async (text: string) => {
-  // if (state.isDev) {
-  //   console.log(text);
-  //   return text;
-  // }
+type Attachment = {
+  title: string;
+  text?: string;
+  imageurl?: string;
+};
+
+const sendMessage = async (text: string, attachments?: Attachment[]) => {
+  if (state.isDev) {
+    console.log(text);
+  }
 
   const url = state.isDev
     ? BOT_API_URL_TEST
@@ -60,7 +54,7 @@ const sendMessage = async (text: string) => {
     },
     body: JSON.stringify({
       botName: "밥먹으러 갈까요🍚",
-      text,
+      attachments,
     }),
   });
 
@@ -75,15 +69,20 @@ const getToday = () => {
   return date.getDay() - 1;
 };
 
-const getTextContent = (meal: string[], day: number) => {
+const getAttachments = (meal: Course[], day: number) => {
   const date = new Date();
   const month = date.getMonth() + 1;
   const dateNumber = date.getDate();
   const title =
     state.meal === MEAL.LUNCH ? "오늘의 점심 메뉴" : "오늘의 저녁 메뉴";
 
-  return `${month}/${dateNumber} - ${title}\n
-${meal.join("\n")}`;
+  const courses = meal.map((course) => ({
+    title: course.calories
+      ? `${course.label} - ${course.calories} kcal`
+      : course.label,
+    text: course.menus.join("\n"),
+  }));
+  return [{ title: `${month}/${dateNumber} - ${title}` }, ...courses];
 };
 
 const start = async () => {
@@ -111,9 +110,9 @@ const start = async () => {
     state.meal === MEAL.LUNCH
       ? mealData.getLunch(today)
       : mealData.getDinner(today);
-  const message = getTextContent(meal, today);
-  await sendMessage(message);
-  console.log(message);
+  const attachments = getAttachments(meal, today);
+  await sendMessage("", attachments);
+  console.log(attachments);
   console.log("END");
 };
 

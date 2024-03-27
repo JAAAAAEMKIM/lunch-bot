@@ -1,16 +1,16 @@
-import { join } from "path";
-
-import { WorkSheet, readFile, set_fs } from "xlsx";
+import { WorkBook, WorkSheet, readFile, set_fs } from "xlsx";
 
 import * as fs from "fs";
-import MealData, { Course, WeeklyData } from "./MealData";
+import { WeeklyData } from "./MealData";
+import { Course } from "./CourseList";
+import {
+  CONCEPT_REGEX,
+  COURSE_REGEX,
+  PLUS_REGEX,
+  DAY_COLUMNS,
+} from "@/constants";
 
 set_fs(fs);
-const FILE_NAME = "lunch.xlsx";
-const DAY_COLUMNS = ["D", "E", "F", "G", "H"];
-const COURSE_REGEX = /코스.*/;
-const PLUS_REGEX = /^Plus.*/;
-const CONCEPT_REGEX = /\[.*\]/;
 
 const isCourseLabel = (str: string): boolean =>
   COURSE_REGEX.test(str) ||
@@ -19,31 +19,28 @@ const isCourseLabel = (str: string): boolean =>
   str === "샐러드" ||
   str === "웰핏도시락";
 
-const FileRepository = () => {
-  const readXlsx = () => {
-    const workbook = readFile(join(import.meta.dir, "..", FILE_NAME));
-    const sheet = workbook.Sheets[workbook.SheetNames[1]];
-    return sheet;
-  };
+class XlsxFile {
+  workbook: WorkBook;
 
-  const readDataByIndex = (
+  constructor(path: string) {
+    this.workbook = readFile(path);
+  }
+
+  private readDataByIndex(
     sheet: WorkSheet,
     start: number,
     end: number,
     column: string,
-  ): Course[] => {
+  ): Course[] {
     const courses = [];
 
     let curCourse: Course | null = null;
     for (; start < end; start++) {
       const courseKey = `C${start}`;
 
-      console.log(sheet[courseKey]);
-
       if (sheet[courseKey] && isCourseLabel(sheet[courseKey]["v"])) {
         if (curCourse) {
           courses.push(curCourse);
-          console.log(curCourse);
         }
         curCourse = { label: sheet[courseKey]["v"], menus: [] };
       }
@@ -68,9 +65,13 @@ const FileRepository = () => {
       courses.push(curCourse);
     }
     return courses.filter(Boolean);
-  };
+  }
 
-  const parse = (sheet: WorkSheet) => {
+  private readSheet() {
+    return this.workbook.Sheets[this.workbook.SheetNames[1]];
+  }
+
+  private parseSheet(sheet: WorkSheet) {
     const rows = Object.keys(sheet)
       .map((key) => Number(key.substring(1)))
       .filter((x) => !isNaN(x));
@@ -89,21 +90,17 @@ const FileRepository = () => {
       if (!lunchIdx || !dinnerIdx) return { lunch: [], dinner: [] };
 
       return {
-        lunch: readDataByIndex(sheet, lunchIdx, dinnerIdx, column),
-        dinner: readDataByIndex(sheet, dinnerIdx, lastIdx, column),
+        lunch: this.readDataByIndex(sheet, lunchIdx, dinnerIdx, column),
+        dinner: this.readDataByIndex(sheet, dinnerIdx, lastIdx, column),
       };
     });
 
-    console.log(menus);
     return menus;
-  };
+  }
 
-  const getData = (): MealData => {
-    const sheet = readXlsx();
-    return new MealData(parse(sheet));
-  };
+  parse() {
+    return this.parseSheet(this.readSheet());
+  }
+}
 
-  return getData();
-};
-
-export default FileRepository;
+export default XlsxFile;

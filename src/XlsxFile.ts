@@ -1,8 +1,8 @@
 import { WorkBook, WorkSheet, readFile, set_fs } from "xlsx";
 
 import * as fs from "fs";
-import { WeeklyData } from "./MealData";
-import { Course } from "./CourseList";
+import { WeeklyData } from "@/MealData";
+import { Course } from "@/CourseList";
 import {
   CONCEPT_REGEX,
   COURSE_REGEX,

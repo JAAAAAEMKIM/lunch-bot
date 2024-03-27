@@ -1,4 +1,3 @@
-import { MEAL } from "@/MealData";
 import { Attachment } from "@/Attachment";
 
 type Menu = string;
@@ -25,7 +24,7 @@ class CourseList {
 
     const courses = this.list.map((course) => ({
       title: course.calories
-        ? `${course.label} - ${course.calories} kcal`
+        ? `${course.label} - ${course.calories.toFixed(2)} kcal`
         : course.label,
       text: course.menus.join("\n"),
     }));

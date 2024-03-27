@@ -1,4 +1,4 @@
-import { Course } from "./CourseList";
+import { Course } from "@/CourseList";
 
 export const MEAL = {
   DINNER: "dinner",

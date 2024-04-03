@@ -1,3 +1,5 @@
+import fetch from "node-fetch";
+
 type Attachment = {
   title: string;
   text?: string;
@@ -15,6 +17,7 @@ export const sendMessage = async (url: string, attachments?: Attachment[]) => {
       attachments,
     }),
   });
-
-  return result.json();
+  if (!result.ok) {
+    throw new Error("Message Failed.");
+  }
 };

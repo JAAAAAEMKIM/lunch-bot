@@ -115,7 +115,7 @@ out
 # Nuxt.js build / generate output
 
 .nuxt
-dist
+# dist - dist를 직접 올림.
 
 # Gatsby files
 

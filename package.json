@@ -1,20 +1,29 @@
 {
   "name": "lunch-bot",
   "module": "index.ts",
-  "type": "module",
   "scripts": {
+    "build": "webpack --mode production",
+    "start": "node dist/script.bundle.js",
     "download": "npx playwright test"
   },
   "devDependencies": {
     "@playwright/test": "^1.42.1",
-    "bun-types": "latest",
-    "playwright": "^1.42.1"
+    "@types/node": "^20.12.3",
+    "@types/webpack": "^5.28.5",
+    "playwright": "^1.42.1",
+    "ts-loader": "^9.5.1",
+    "ts-node": "^10.9.2",
+    "tsconfig-paths-webpack-plugin": "^4.1.0",
+    "typescript": "^5.4.3",
+    "webpack": "^5.91.0",
+    "webpack-cli": "^5.1.4"
   },
   "peerDependencies": {
     "typescript": "^5.0.0"
   },
   "dependencies": {
     "dotenv": "^16.4.5",
-    "xlsx": "https://cdn.sheetjs.com/xlsx-0.20.0/xlsx-0.20.0.tgz"
+    "node-fetch": "^3.3.2",
+    "xlsx": "^0.18.5"
   }
 }

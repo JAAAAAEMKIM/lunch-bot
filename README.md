@@ -1,15 +1,31 @@
 # lunch-bot
 
-To install dependencies:
+### To install dependencies:
 
 ```bash
-bun install
+pnpm install
 ```
 
-To run:
+### To build:
 
 ```bash
-bun script.ts
+pnpm build
 ```
 
-This project was created using `bun init` in bun v1.0.7. [Bun](https://bun.sh) is a fast all-in-one JavaScript runtime.
+### To run: (build before run)
+
+```bash
+pnpm start {args}
+```
+
+### To download menus:
+
+```bash
+pnpm download
+```
+
+### args:
+
+--dev: send to lunch-bot-dev
+--dinner: send dinner
+--chan2: send to group chat. (default: FE chat)

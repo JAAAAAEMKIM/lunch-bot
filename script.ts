@@ -3,6 +3,7 @@ import MealData, { MEAL } from "@/MealData";
 import State from "@/State";
 import data from "./lunch.json";
 import CourseList from "@/CourseList";
+import { BOT_API_URL } from "@/constants";
 
 const getToday = () => {
   const date = new Date();
@@ -13,7 +14,7 @@ const getToday = () => {
 };
 
 const start = async () => {
-  const flags = Bun.argv.slice(2);
+  const flags = process.argv.slice(2);
   const state = State.getInstance();
   state.set({
     isDev: Boolean(flags.find((f) => f === "--dev")) || false,
@@ -39,10 +40,10 @@ const start = async () => {
   const attachments = new CourseList(meal).toAttachments(isLunch);
 
   const url = state.isDev
-    ? process.env.BOT_API_URL_TEST
+    ? BOT_API_URL.TEST
     : state.channel === 1
-      ? process.env.BOT_API_URL_FE
-      : process.env.BOT_API_URL_GROUP;
+      ? BOT_API_URL.FE
+      : BOT_API_URL.GROUP;
 
   if (!url) {
     throw Error("No URL found.");

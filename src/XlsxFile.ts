@@ -10,8 +10,6 @@ import {
   DAY_COLUMNS,
 } from "@/constants";
 
-set_fs(fs);
-
 const isCourseLabel = (str: string): boolean =>
   COURSE_REGEX.test(str) ||
   PLUS_REGEX.test(str) ||

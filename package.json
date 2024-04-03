@@ -4,6 +4,7 @@
   "scripts": {
     "build": "webpack --mode production",
     "start": "node dist/script.bundle.js",
+    "dev": "webpack --mode production && node dist/script.bundle.js --dev",
     "download": "npx playwright test"
   },
   "devDependencies": {

@@ -2,6 +2,9 @@
   "name": "lunch-bot",
   "module": "index.ts",
   "type": "module",
+  "scripts": {
+    "download": "npx playwright test"
+  },
   "devDependencies": {
     "@playwright/test": "^1.42.1",
     "bun-types": "latest",

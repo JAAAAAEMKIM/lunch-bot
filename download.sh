@@ -7,5 +7,5 @@ DATE=$(date '+%Y-%m-%d %H:%M:%S')
 pnpm run download
 
 git add lunch.json
-git commit -m "Commit-$MESSAGE"
+git commit -m "Commit-$DATE"
 git push

@@ -1,14 +1,7 @@
-import { WorkBook, WorkSheet, readFile, set_fs } from "xlsx";
+import XLSX, { WorkBook, WorkSheet, readFile } from "xlsx";
 
-import * as fs from "fs";
-import { WeeklyData } from "@/MealData";
 import { Course } from "@/CourseList";
-import {
-  CONCEPT_REGEX,
-  COURSE_REGEX,
-  PLUS_REGEX,
-  DAY_COLUMNS,
-} from "@/constants";
+import { COURSE_REGEX, PLUS_REGEX, COLUMN_COUNT } from "@/constants";
 
 const isCourseLabel = (str: string): boolean =>
   COURSE_REGEX.test(str) ||
@@ -25,73 +18,74 @@ class XlsxFile {
   }
 
   private readDataByIndex(
-    sheet: WorkSheet,
-    start: number,
-    end: number,
-    column: string,
+    data: Array<Array<string | undefined>>,
+    rowStart: number,
+    rowEnd: number,
+    columnStart: number,
   ): Course[] {
     const courses = [];
 
     let curCourse: Course | null = null;
-    for (; start < end; start++) {
-      const courseKey = `C${start}`;
-
-      if (sheet[courseKey] && isCourseLabel(sheet[courseKey]["v"])) {
-        if (curCourse) {
+    for (let row = rowStart; row < rowEnd; row++) {
+      const label = data[row][1];
+      if (label) {
+        if (curCourse && curCourse.menus.length > 0) {
           courses.push(curCourse);
         }
-        curCourse = { label: sheet[courseKey]["v"], menus: [] };
+        curCourse = {
+          label: label.replace(/\r\n/, " "),
+          menus: [],
+        };
       }
 
       if (!curCourse) {
-        start += 1;
         continue;
       }
-      const dataKey = `${column}${start}`;
-      if (sheet[dataKey]) {
-        const data = sheet[dataKey]["v"];
-        if (typeof data === "number") {
-          curCourse.calories = data;
-        } else if (CONCEPT_REGEX.exec(data)) {
-          curCourse.concept = data;
-        } else {
-          curCourse.menus.push(data);
-        }
+      const menuRow = data[row].slice(columnStart, columnStart + COLUMN_COUNT);
+      const menu = menuRow[0];
+
+      if (curCourse.label === "PLUS") {
+        if (!menu) continue;
+        if (/(현미밥.*|그린샐러드|드레싱|.*김치)/.test(menu)) continue;
+
+        curCourse.menus.push(menuRow);
+        continue;
+      }
+      if (curCourse.label === "도시락") {
+        menu && curCourse.menus.push(menuRow);
+        continue;
+      }
+      if (menu) {
+        curCourse.menus.push(menuRow);
       }
     }
-    if (curCourse) {
+    if (curCourse && curCourse.menus.length) {
       courses.push(curCourse);
     }
     return courses.filter(Boolean);
   }
 
   private readSheet() {
-    return this.workbook.Sheets[this.workbook.SheetNames[1]];
+    return this.workbook.Sheets[this.workbook.SheetNames[0]];
   }
 
   private parseSheet(sheet: WorkSheet) {
-    const rows = Object.keys(sheet)
-      .map((key) => Number(key.substring(1)))
-      .filter((x) => !isNaN(x));
+    const data = XLSX.utils.sheet_to_json<string[]>(sheet, { header: 1 });
+    const categories = data.map((row) => row[0]);
+    const lunchIdx = categories.findIndex((x) => x === "중식");
+    const dinnerIdx = categories.findIndex((x) => x === "석식");
 
-    const categories = Object.keys(sheet).filter((key) => key.startsWith("B"));
+    const menus = [];
 
-    const lastIdx = rows[rows.length - 1];
-    const lunchIdx = Number(
-      categories.find((c) => sheet[c]?.v === "점심")?.substring(1),
-    );
-    const dinnerIdx = Number(
-      categories.find((c) => sheet[c]?.v === "저녁")?.substring(1),
-    );
+    for (let day = 0; day < 5; day++) {
+      if (!lunchIdx || !dinnerIdx) menus.push({ lunch: [], dinner: [] });
+      const columnStart = 2 + COLUMN_COUNT * day;
 
-    const menus: WeeklyData = DAY_COLUMNS.map((column) => {
-      if (!lunchIdx || !dinnerIdx) return { lunch: [], dinner: [] };
-
-      return {
-        lunch: this.readDataByIndex(sheet, lunchIdx, dinnerIdx, column),
-        dinner: this.readDataByIndex(sheet, dinnerIdx, lastIdx, column),
-      };
-    });
+      menus.push({
+        lunch: this.readDataByIndex(data, lunchIdx, dinnerIdx, columnStart),
+        dinner: this.readDataByIndex(data, dinnerIdx, data.length, columnStart),
+      });
+    }
 
     return menus;
   }

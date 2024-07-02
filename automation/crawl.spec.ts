@@ -30,7 +30,7 @@ test("crawl menu sheet", async () => {
     .click();
   const downloadPromise = page.waitForEvent("download");
   await page.getByRole("link", { name: /첨부파일/ }).click();
-  await page.getByRole("link", { name: /주간식단표/ }).click();
+  await page.getByRole("link", { name: /\.xlsx/ }).click();
   const download = await downloadPromise;
   const path = await download.path();
 

@@ -4,6 +4,7 @@ export type Course = {
     label: string;
     menus: Menu[];
     calories?: number;
+    protein?: number;
     concept?: string;
 };
 declare class CourseList {

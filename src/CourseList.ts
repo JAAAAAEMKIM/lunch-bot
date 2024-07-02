@@ -1,11 +1,22 @@
 import { Attachment } from "@/Attachment";
 
-type Menu = string;
-type MenuRow = (Menu | undefined)[];
+type MenuInfo = [
+  string,
+  string | null,
+  string,
+  string,
+  string,
+  number,
+  number,
+  number,
+  number,
+  number | null,
+  number | null,
+];
 
 export type Course = {
   label: string;
-  menus: MenuRow[];
+  menus: MenuInfo[];
 };
 
 class CourseList {

@@ -1,11 +1,8 @@
 import { Attachment } from "@/Attachment";
-type Menu = string;
+type MenuInfo = (string | number | null | undefined)[];
 export type Course = {
     label: string;
-    menus: Menu[];
-    calories?: number;
-    protein?: number;
-    concept?: string;
+    menus: MenuInfo[];
 };
 declare class CourseList {
     list: Course[];

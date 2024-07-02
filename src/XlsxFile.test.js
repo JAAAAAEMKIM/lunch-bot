@@ -14,4 +14,14 @@ describe("XlsxFile", () => {
     expect(parsed[0].dinner[0].menus[0][0]).toEqual("전주비빔밥");
     expect(parsed[0].dinner[0].menus[0][5]).toEqual(411.6);
   });
+
+  // 목요일 엑셀 오류가 있어 수정 전까지 대기
+  it("parses friday", () => {
+    const xlsxFile = new XlsxFile(
+      path.join(__dirname, "./__mocks__/lunch.xlsx"),
+    );
+    const parsed = xlsxFile.parse();
+    expect(parsed[4].lunch[0].label).toEqual("1코스 한식");
+    expect(parsed[4].lunch[0].menus[1]).toEqual("1코스 한식");
+  });
 });

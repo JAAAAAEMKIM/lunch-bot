@@ -11,7 +11,7 @@ declare class State {
     static getInstance(): State;
     get meal(): MEAL;
     get isDev(): boolean;
-    get channel(): 2 | 1;
+    get channel(): 1 | 2;
     set(partial: Partial<_State>): void;
 }
 export default State;

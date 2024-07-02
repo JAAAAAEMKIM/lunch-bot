@@ -1,18 +1,6 @@
 import { Attachment } from "@/Attachment";
 
-type MenuInfo = [
-  string,
-  string | null,
-  string,
-  string,
-  string,
-  number,
-  number,
-  number,
-  number,
-  number | null,
-  number | null,
-];
+type MenuInfo = (string | number | null | undefined)[];
 
 export type Course = {
   label: string;
@@ -40,7 +28,7 @@ class CourseList {
             text: course.menus
               .map(
                 (menu) =>
-                  `${menu[0]?.replace("\r\n", " ")}\n(${menu[5]} kcal / ${menu[6]}g)`,
+                  `${String(menu[0] || "").replace("\r\n", " ")}\n(${menu[5]} kcal / ${menu[6]}g)`,
               )
               .join("\n"),
           };
@@ -48,7 +36,9 @@ class CourseList {
         if (course.label === "PLUS") {
           const menus = course.menus.filter(
             (menu) =>
-              !/(.*김치|현미밥.*|그린샐러드|드레싱)/.test(menu[0] || ""),
+              !/(.*김치|현미밥.*|그린샐러드|드레싱)/.test(
+                String(menu[0] || ""),
+              ),
           );
           const calories = menus.reduce(
             (total, menu) => total + Number(menu[5]),
@@ -60,7 +50,7 @@ class CourseList {
           );
           return {
             title: course.label.replace("\r\n", " "),
-            text: `${menus.map((menu) => menu[0]?.replace("\r\n", " ")).join("\n")}
+            text: `${menus.map((menu) => String(menu[0] || "")?.replace("\r\n", " ")).join("\n")}
 
 열량: ${calories.toFixed(2)} kcal`,
           };
@@ -75,7 +65,7 @@ class CourseList {
         );
         return {
           title: course.label.replace("\r\n", " "),
-          text: `${course.menus.map((menu) => menu[0]?.replace("\r\n", " ")).join("\n")}
+          text: `${course.menus.map((menu) => String(menu[0] || "")?.replace("\r\n", " ")).join("\n")}
 
 열량: ${calories.toFixed(2)} kcal
 단백질: ${protein.toFixed(2)}g`,

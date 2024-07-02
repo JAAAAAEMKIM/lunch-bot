@@ -18,7 +18,7 @@ class XlsxFile {
   }
 
   private readDataByIndex(
-    data: Array<Array<string | undefined>>,
+    data: Array<Array<string | number | undefined>>,
     rowStart: number,
     rowEnd: number,
     columnStart: number,
@@ -27,7 +27,7 @@ class XlsxFile {
 
     let curCourse: Course | null = null;
     for (let row = rowStart; row < rowEnd; row++) {
-      const label = data[row][1];
+      const label = String(data[row][1] || "");
       if (label) {
         if (curCourse && curCourse.menus.length > 0) {
           courses.push(curCourse);
@@ -42,7 +42,7 @@ class XlsxFile {
         continue;
       }
       const menuRow = data[row].slice(columnStart, columnStart + COLUMN_COUNT);
-      const menu = menuRow[0];
+      const menu = String(menuRow[0] || "");
 
       if (curCourse.label === "PLUS") {
         if (!menu) continue;
@@ -70,7 +70,9 @@ class XlsxFile {
   }
 
   private parseSheet(sheet: WorkSheet) {
-    const data = XLSX.utils.sheet_to_json<string[]>(sheet, { header: 1 });
+    const data = XLSX.utils.sheet_to_json<(string | number)[]>(sheet, {
+      header: 1,
+    });
     const categories = data.map((row) => row[0]);
     const lunchIdx = categories.findIndex((x) => x === "중식");
     const dinnerIdx = categories.findIndex((x) => x === "석식");

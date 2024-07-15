@@ -29,7 +29,7 @@ class CourseList {
             text: course.menus
               .map(
                 (menu) =>
-                  `${String(menu[0] || "").replace("\r\n", " ")}\n(${menu[PROTEIN_IDX]} kcal / ${menu[CALORY_IDX]}g)`,
+                  `${String(menu[0] || "").replace("\r\n", " ")}\n(${menu[CALORY_IDX]} kcal / ${menu[PROTEIN_IDX]}g)`,
               )
               .join("\n"),
           };
@@ -42,11 +42,11 @@ class CourseList {
               ),
           );
           const calories = menus.reduce(
-            (total, menu) => total + Number(menu[PROTEIN_IDX]),
+            (total, menu) => total + Number(menu[CALORY_IDX]),
             0,
           );
           const protein = menus.reduce(
-            (total, menu) => total + Number(menu[CALORY_IDX]),
+            (total, menu) => total + Number(menu[PROTEIN_IDX]),
             0,
           );
           return {
@@ -57,11 +57,11 @@ class CourseList {
           };
         }
         const calories = course.menus.reduce(
-          (total, menu) => total + Number(menu[PROTEIN_IDX]),
+          (total, menu) => total + Number(menu[CALORY_IDX]),
           0,
         );
         const protein = course.menus.reduce(
-          (total, menu) => total + Number(menu[CALORY_IDX]),
+          (total, menu) => total + Number(menu[PROTEIN_IDX]),
           0,
         );
         return {

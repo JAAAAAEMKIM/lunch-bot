@@ -1,7 +1,7 @@
-import XLSX, { WorkBook, WorkSheet, readFile } from "xlsx";
+import XLSX, { Sheet, WorkBook, WorkSheet, readFile } from "xlsx";
 
 import { Course } from "@/CourseList";
-import { COURSE_REGEX, PLUS_REGEX, COLUMN_COUNT } from "@/constants";
+import { COURSE_REGEX, PLUS_REGEX, COLUMN_COUNT, RATIO_IDX } from "@/constants";
 
 const isCourseLabel = (str: string): boolean =>
   COURSE_REGEX.test(str) ||
@@ -9,6 +9,16 @@ const isCourseLabel = (str: string): boolean =>
   str === "샌드위치" ||
   str === "샐러드" ||
   str === "웰핏도시락";
+
+function getExcelColumnLabel(index: number) {
+  let label = "";
+  while (index > 0) {
+    let remainder = (index - 1) % 26;
+    label = String.fromCharCode(65 + remainder) + label;
+    index = Math.floor((index - 1) / 26);
+  }
+  return label;
+}
 
 class XlsxFile {
   workbook: WorkBook;
@@ -22,6 +32,7 @@ class XlsxFile {
     rowStart: number,
     rowEnd: number,
     columnStart: number,
+    rawSheet: Sheet,
   ): Course[] {
     const courses = [];
 
@@ -42,6 +53,14 @@ class XlsxFile {
         continue;
       }
       const menuRow = data[row].slice(columnStart, columnStart + COLUMN_COUNT);
+      const ratioCellIdx = [
+        getExcelColumnLabel(columnStart + RATIO_IDX + 1),
+        row + 1,
+      ].join("");
+      if (rawSheet[ratioCellIdx]?.w) {
+        menuRow[RATIO_IDX] = rawSheet[ratioCellIdx]?.w;
+      }
+
       const menu = String(menuRow[0] || "");
 
       if (curCourse.label === "PLUS") {
@@ -81,11 +100,25 @@ class XlsxFile {
 
     for (let day = 0; day < 5; day++) {
       if (!lunchIdx || !dinnerIdx) menus.push({ lunch: [], dinner: [] });
-      const columnStart = 2 + COLUMN_COUNT * day;
+
+      const columnStart =
+        day === 0 ? 2 : 2 + COLUMN_COUNT - 1 + COLUMN_COUNT * (day - 1);
 
       menus.push({
-        lunch: this.readDataByIndex(data, lunchIdx, dinnerIdx, columnStart),
-        dinner: this.readDataByIndex(data, dinnerIdx, data.length, columnStart),
+        lunch: this.readDataByIndex(
+          data,
+          lunchIdx,
+          dinnerIdx,
+          columnStart,
+          sheet,
+        ),
+        dinner: this.readDataByIndex(
+          data,
+          dinnerIdx,
+          data.length,
+          columnStart,
+          sheet,
+        ),
       });
     }
 

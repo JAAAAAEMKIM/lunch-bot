@@ -1,11 +1,22 @@
 import { Attachment } from "@/Attachment";
-import { PROTEIN_IDX, CALORY_IDX } from "@/constants";
+import { PROTEIN_IDX, CALORY_IDX, RATIO_IDX } from "@/constants";
 
 type MenuInfo = (string | number | null | undefined)[];
 
 export type Course = {
   label: string;
   menus: MenuInfo[];
+};
+
+const getProteinFrom = (
+  ratio: string | number | null | undefined,
+  calory: string | number | null | undefined,
+) => {
+  if (!ratio || !calory || typeof ratio === "number") return 0;
+  const [carb, protein, fat] = ratio.split(":").map(Number);
+  if (!carb || !protein || !fat) return 0;
+
+  return (Number(calory) * protein) / (carb * 4 + protein * 4 + fat * 9);
 };
 
 class CourseList {
@@ -29,7 +40,7 @@ class CourseList {
             text: course.menus
               .map(
                 (menu) =>
-                  `${String(menu[0] || "").replace("\r\n", " ")}\n(${menu[PROTEIN_IDX]} kcal / ${menu[CALORY_IDX]}g)`,
+                  `${String(menu[0] || "").replace("\r\n", " ")}\n(${menu[CALORY_IDX]} kcal / ${getProteinFrom(menu[RATIO_IDX], menu[CALORY_IDX]).toFixed(2)}g)`,
               )
               .join("\n"),
           };
@@ -41,29 +52,15 @@ class CourseList {
                 String(menu[0] || ""),
               ),
           );
-          const calories = menus.reduce(
-            (total, menu) => total + Number(menu[PROTEIN_IDX]),
-            0,
-          );
-          const protein = menus.reduce(
-            (total, menu) => total + Number(menu[CALORY_IDX]),
-            0,
-          );
           return {
             title: course.label.replace("\r\n", " "),
-            text: `${menus.map((menu) => String(menu[0] || "")?.replace("\r\n", " ")).join("\n")}
-
-열량: ${calories.toFixed(2)} kcal`,
+            text: `${menus.map((menu) => String(menu[0] || "")?.replace("\r\n", " ")).join("\n")}`,
           };
         }
-        const calories = course.menus.reduce(
-          (total, menu) => total + Number(menu[PROTEIN_IDX]),
-          0,
-        );
-        const protein = course.menus.reduce(
-          (total, menu) => total + Number(menu[CALORY_IDX]),
-          0,
-        );
+        const menu = course.menus[0];
+        const calories = Number(menu[CALORY_IDX]) || 0;
+        const protein = getProteinFrom(menu[RATIO_IDX], calories);
+
         return {
           title: course.label.replace("\r\n", " "),
           text: `${course.menus.map((menu) => String(menu[0] || "")?.replace("\r\n", " ")).join("\n")}

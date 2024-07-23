@@ -2,9 +2,10 @@ export const DAY_COLUMNS = ["C", "N", "Y", "AJ", "AT"];
 export const COURSE_REGEX = /코스.*/;
 export const PLUS_REGEX = /^Plus.*/;
 export const CONCEPT_REGEX = /\[.*\]/;
-export const COLUMN_COUNT = 11;
+export const COLUMN_COUNT = 6;
 export const PROTEIN_IDX = 6;
 export const CALORY_IDX = 5;
+export const RATIO_IDX = 4;
 
 export const BOT_API_URL = {
   FE: "https://hook.dooray.com/services/3036349505739914786/3671781334191004776/uMh3AktTSbKWyyBvzaO4FA",

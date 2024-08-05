@@ -1,5 +1,5 @@
 import { Attachment } from "@/Attachment";
-import { PROTEIN_IDX, CALORY_IDX, RATIO_IDX } from "@/constants";
+import { CALORY_IDX, RATIO_IDX } from "@/constants";
 
 type MenuInfo = (string | number | null | undefined)[];
 

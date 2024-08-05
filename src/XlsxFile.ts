@@ -101,8 +101,7 @@ class XlsxFile {
     for (let day = 0; day < 5; day++) {
       if (!lunchIdx || !dinnerIdx) menus.push({ lunch: [], dinner: [] });
 
-      const columnStart =
-        day === 0 ? 2 : 2 + COLUMN_COUNT - 1 + COLUMN_COUNT * (day - 1);
+      const columnStart = 2 + COLUMN_COUNT * day;
 
       menus.push({
         lunch: this.readDataByIndex(

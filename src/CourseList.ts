@@ -1,5 +1,5 @@
 import { Attachment } from "@/Attachment";
-import { CALORY_IDX, RATIO_IDX } from "@/constants";
+import { CALORY_IDX, PROTEIN_IDX, RATIO_IDX } from "@/constants";
 
 type MenuInfo = (string | number | null | undefined)[];
 
@@ -40,7 +40,7 @@ class CourseList {
             text: course.menus
               .map(
                 (menu) =>
-                  `${String(menu[0] || "").replace("\r\n", " ")}\n(${menu[CALORY_IDX]} kcal / ${getProteinFrom(menu[RATIO_IDX], menu[CALORY_IDX]).toFixed(2)}g)`,
+                  `${String(menu[0] || "").replace("\r\n", " ")}\n${menu[CALORY_IDX]} kcal / ${menu[PROTEIN_IDX]}g`,
               )
               .join("\n"),
           };
@@ -59,7 +59,7 @@ class CourseList {
         }
         const menu = course.menus[0];
         const calories = Number(menu[CALORY_IDX]) || 0;
-        const protein = getProteinFrom(menu[RATIO_IDX], calories);
+        const protein = Number(menu[PROTEIN_IDX]) || 0;
 
         return {
           title: course.label.replace("\r\n", " "),

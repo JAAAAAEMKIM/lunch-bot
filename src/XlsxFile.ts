@@ -1,14 +1,7 @@
 import XLSX, { Sheet, WorkBook, WorkSheet, readFile } from "xlsx";
 
 import { Course } from "@/CourseList";
-import { COURSE_REGEX, PLUS_REGEX, COLUMN_COUNT, RATIO_IDX } from "@/constants";
-
-const isCourseLabel = (str: string): boolean =>
-  COURSE_REGEX.test(str) ||
-  PLUS_REGEX.test(str) ||
-  str === "샌드위치" ||
-  str === "샐러드" ||
-  str === "웰핏도시락";
+import { CATEGORY_IDX, COLUMN_COUNT, RATIO_IDX } from "@/constants";
 
 function getExcelColumnLabel(index: number) {
   let label = "";
@@ -38,7 +31,7 @@ class XlsxFile {
 
     let curCourse: Course | null = null;
     for (let row = rowStart; row < rowEnd; row++) {
-      const label = String(data[row][1] || "");
+      const label = String(data[row][2] || "");
       if (label) {
         if (curCourse && curCourse.menus.length > 0) {
           courses.push(curCourse);
@@ -53,13 +46,13 @@ class XlsxFile {
         continue;
       }
       const menuRow = data[row].slice(columnStart, columnStart + COLUMN_COUNT);
-      const ratioCellIdx = [
-        getExcelColumnLabel(columnStart + RATIO_IDX + 1),
-        row + 1,
-      ].join("");
-      if (rawSheet[ratioCellIdx]?.w) {
-        menuRow[RATIO_IDX] = rawSheet[ratioCellIdx]?.w;
-      }
+      // const ratioCellIdx = [
+      //   getExcelColumnLabel(columnStart + RATIO_IDX + 1),
+      //   row + 1,
+      // ].join("");
+      // if (rawSheet[ratioCellIdx]?.w) {
+      //   menuRow[RATIO_IDX] = rawSheet[ratioCellIdx]?.w;
+      // }
 
       const menu = String(menuRow[0] || "");
 
@@ -69,8 +62,8 @@ class XlsxFile {
 
         curCourse.menus.push(menuRow);
         continue;
-      }
-      if (curCourse.label === "도시락") {
+      } else if (!curCourse.label.includes(`코스`)) {
+        curCourse.label = "도시락";
         menu && curCourse.menus.push(menuRow);
         continue;
       }
@@ -92,7 +85,7 @@ class XlsxFile {
     const data = XLSX.utils.sheet_to_json<(string | number)[]>(sheet, {
       header: 1,
     });
-    const categories = data.map((row) => row[0]);
+    const categories = data.map((row) => row[CATEGORY_IDX]);
     const lunchIdx = categories.findIndex((x) => x === "중식");
     const dinnerIdx = categories.findIndex((x) => x === "석식");
 
@@ -101,7 +94,7 @@ class XlsxFile {
     for (let day = 0; day < 5; day++) {
       if (!lunchIdx || !dinnerIdx) menus.push({ lunch: [], dinner: [] });
 
-      const columnStart = 2 + COLUMN_COUNT * day;
+      const columnStart = 3 + COLUMN_COUNT * day;
 
       menus.push({
         lunch: this.readDataByIndex(

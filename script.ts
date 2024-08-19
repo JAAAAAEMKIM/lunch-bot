@@ -4,6 +4,7 @@ import State from "@/State";
 import data from "./lunch.json";
 import CourseList from "@/CourseList";
 import { BOT_API_URL } from "@/constants";
+import { getRandomEmoji } from "@/EmojiService";
 
 const getToday = () => {
   const date = new Date();
@@ -38,6 +39,7 @@ const start = async () => {
     : mealData.getByDay(today).dinner;
 
   const attachments = new CourseList(meal).toAttachments(isLunch);
+  const text = getRandomEmoji(5);
 
   const url = state.isDev
     ? BOT_API_URL.TEST
@@ -49,7 +51,7 @@ const start = async () => {
     throw Error("No URL found.");
   }
 
-  await sendMessage(url, attachments);
+  await sendMessage(url, attachments, text);
 
   console.log(attachments);
   console.log("END");

@@ -6,7 +6,11 @@ type Attachment = {
   imageurl?: string;
 };
 
-export const sendMessage = async (url: string, attachments?: Attachment[]) => {
+export const sendMessage = async (
+  url: string,
+  attachments?: Attachment[],
+  text?: string,
+) => {
   const result = await fetch(url, {
     method: "POST",
     headers: {
@@ -15,6 +19,7 @@ export const sendMessage = async (url: string, attachments?: Attachment[]) => {
     body: JSON.stringify({
       botName: "밥먹으러 갈까요🍚",
       attachments,
+      text,
     }),
   });
   if (!result.ok) {

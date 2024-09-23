@@ -40,7 +40,7 @@ class CourseList {
             text: course.menus
               .map(
                 (menu) =>
-                  `${String(menu[0] || "").replace("\r\n", " ")}\n${menu[CALORY_IDX]} kcal / ${menu[PROTEIN_IDX]}g`,
+                  `${String(menu[0] || "").replace("\r\n", " ")}\n${menu[CALORY_IDX]} kcal / ${Number(menu[PROTEIN_IDX]).toFixed(2)}g`,
               )
               .join("\n"),
           };

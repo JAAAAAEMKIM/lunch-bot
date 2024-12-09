@@ -17,7 +17,11 @@ class XlsxFile {
   workbook: WorkBook;
 
   constructor(path: string) {
-    this.workbook = readFile(path);
+    this.workbook = readFile(path, {
+      WTF: true,
+      cellHTML: false,
+      cellText: false,
+    });
   }
 
   private readDataByIndex(
@@ -30,6 +34,7 @@ class XlsxFile {
     const courses = [];
 
     let curCourse: Course | null = null;
+
     for (let row = rowStart; row < rowEnd; row++) {
       const label = String(data[row][2] || "");
       if (label) {
@@ -78,7 +83,7 @@ class XlsxFile {
   }
 
   private readSheet() {
-    return this.workbook.Sheets[this.workbook.SheetNames[0]];
+    return this.workbook.Sheets["칼로리및알레르기공시"];
   }
 
   private parseSheet(sheet: WorkSheet) {

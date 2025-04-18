@@ -75,7 +75,7 @@ DEFAULT_LUNCH_JSON_PATH=./lunch.json
 ## 주요 구성요소
 
 - **컨트롤러**: `MealController`, `CrawlController` - 외부 요청 처리
-- **서비스**: `SendDailyMealService` - 핵심 비즈니스 로직 구현
+- **서비스**: `SendDailyMealService` - 메시지 전송 비즈니스 로직 구현
 - **어댑터**: `CrawlServiceAdapter`, `DoorayMessageAdapter` 등 - 외부 서비스 연동
 - **리포지토리**: `JsonMealRepository` - 식단 데이터 저장 및 조회
 - **자동화 스크립트**: Playwright를 사용한 웹 크롤링 자동화

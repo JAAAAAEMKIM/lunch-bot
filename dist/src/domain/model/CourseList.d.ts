@@ -1,9 +1,9 @@
-import { AttachmentDto } from '@/domain/types';
+import { CourseListDisplayData } from '@/domain/types';
 import Course from './Course';
-import { MenuIndices } from './MenuInfo';
 declare class CourseList {
     private courses;
-    constructor(courses: Course[], indices: MenuIndices);
-    toAttachments(isLunch: boolean): AttachmentDto[];
+    constructor(courses: Course[]);
+    private getTitle;
+    toDisplayData(isLunch: boolean): CourseListDisplayData;
 }
 export default CourseList;

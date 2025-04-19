@@ -1,9 +1,10 @@
+import { MealParser } from '@/infrastructure/repository/parser/MealParser';
 import { MealRepository } from '@/application/repository/MealRepository';
 import WeeklyData from '@/domain/model/WeeklyData';
-import { WeeklyDataDto } from '@/domain/types';
 export declare class JsonMealRepository implements MealRepository {
     private jsonFilePath;
-    constructor(jsonFilePath: string);
+    private parser;
+    constructor(jsonFilePath: string, parser: MealParser);
     /**
      * JSON 파일에서 주간 식단 데이터를 불러옵니다.
      */
@@ -12,5 +13,5 @@ export declare class JsonMealRepository implements MealRepository {
      * 주간 식단 데이터를 JSON 파일로 저장합니다.
      * @param data 저장할 주간 식단 데이터
      */
-    saveWeeklyMeals(data: WeeklyDataDto): Promise<void>;
+    saveWeeklyMeals(path: string): Promise<void>;
 }

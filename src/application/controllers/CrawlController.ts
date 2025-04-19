@@ -1,4 +1,4 @@
-import { CrawlService } from '@/application/ports/CrawlService';
+import CrawlService from '@/application/services/CrawlService';
 
 /**
  * 크롤링된 데이터를 처리하는 컨트롤러
@@ -7,9 +7,11 @@ import { CrawlService } from '@/application/ports/CrawlService';
 export class CrawlController {
   constructor(private crawlService: CrawlService) {}
 
-  async processFile() {
-    await this.crawlService.saveWeeklyMeals();
-
-    return true;
+  async processFile(path: string) {
+    try {
+      return await this.crawlService.saveWeeklyMeals(path);
+    } catch (error) {
+      throw new Error(`파일 저장 중 오류가 발생했습니다., ${error}`);
+    }
   }
 }

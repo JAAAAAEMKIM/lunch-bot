@@ -1,4 +1,4 @@
-import { MEAL } from "@/domain/constants";
+import { MEAL } from '@/domain/constants';
 type ApplicationState = {
     isDev: boolean;
     channel: 1 | 2;
@@ -15,6 +15,7 @@ declare class ApplicationContext {
     get meal(): MEAL;
     get isDev(): boolean;
     get channel(): 1 | 2;
+    get channelType(): "TEST" | "FE" | "GROUP";
     set(partial: Partial<ApplicationState>): void;
 }
 export default ApplicationContext;

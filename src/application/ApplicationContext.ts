@@ -1,4 +1,4 @@
-import { MEAL } from "@/domain/constants";
+import { MEAL } from '@/domain/constants';
 
 type ApplicationState = {
   isDev: boolean;
@@ -22,19 +22,28 @@ class ApplicationContext {
   }
 
   static getInstance() {
-    return ApplicationContext.instance ?? (ApplicationContext.instance = new ApplicationContext());
+    return (
+      ApplicationContext.instance ??
+      (ApplicationContext.instance = new ApplicationContext())
+    );
   }
-  
+
   get meal() {
     return this.state.meal;
   }
-  
+
   get isDev() {
     return this.state.isDev;
   }
-  
+
   get channel() {
     return this.state.channel;
+  }
+
+  get channelType() {
+    if (this.isDev) return 'TEST';
+    if (this.channel === 1) return 'FE';
+    return 'GROUP';
   }
 
   set(partial: Partial<ApplicationState>) {

@@ -1,33 +1,30 @@
-import XLSX, { WorkBook, WorkSheet, readFile } from 'xlsx';
+import XLSX, { WorkSheet, readFile } from 'xlsx';
 
-import { MealParser } from '@/application/ports/MealParser';
+import { MealParser } from '@/infrastructure/repository/parser/MealParser';
 import {
+  CALORY_IDX,
   CATEGORY_IDX,
   COLUMN_COUNT,
-  RATIO_IDX,
+  NAME_IDX,
+  PROTEIN_IDX,
 } from '@/infrastructure/constants';
-import { CourseDto, WeeklyDataDto } from '@/domain/types';
+import { CourseDto, MenuInfoDto, WeeklyDataDto } from '@/domain/types';
 
 /**
  * Excel 파일에서 식단 데이터를 파싱하는 클래스
  */
 class XlsxToJsonMealParser implements MealParser {
-  private workbook: WorkBook | null = null;
-
-  constructor(path?: string) {
-    if (path) {
-      this.setSourcePath(path);
-    }
+  private parseMenu(
+    menuRow: (string | undefined | null | number)[]
+  ): MenuInfoDto {
+    const calory = menuRow[CALORY_IDX];
+    const protein = menuRow[PROTEIN_IDX];
+    return {
+      name: String(menuRow[NAME_IDX] || ''),
+      calory: calory ? Number(calory) : undefined,
+      protein: protein ? Number(protein) : undefined,
+    };
   }
-
-  setSourcePath(path: string): void {
-    this.workbook = readFile(path, {
-      WTF: true,
-      cellHTML: false,
-      cellText: false,
-    });
-  }
-
   private readDataByIndex(
     data: Array<Array<string | number | undefined>>,
     rowStart: number,
@@ -54,22 +51,21 @@ class XlsxToJsonMealParser implements MealParser {
         continue;
       }
       const menuRow = data[row].slice(columnStart, columnStart + COLUMN_COUNT);
-
       const menu = String(menuRow[0] || '');
 
       if (curCourse.label === 'PLUS') {
         if (!menu) continue;
         if (/(현미밥.*|그린샐러드|드레싱|.*김치)/.test(menu)) continue;
 
-        curCourse.menus.push(menuRow);
+        curCourse.menus.push(this.parseMenu(menuRow));
         continue;
-      } else if (!curCourse.label.includes(`코스`)) {
+      } else if (!curCourse.label.includes('코스')) {
         curCourse.label = '도시락';
-        menu && curCourse.menus.push(menuRow);
+        menu && curCourse.menus.push(this.parseMenu(menuRow));
         continue;
       }
       if (menu) {
-        curCourse.menus.push(menuRow);
+        curCourse.menus.push(this.parseMenu(menuRow));
       }
     }
     if (curCourse && curCourse.menus.length) {
@@ -78,13 +74,18 @@ class XlsxToJsonMealParser implements MealParser {
     return courses.filter(Boolean);
   }
 
-  private readSheet() {
-    if (!this.workbook) {
+  private readSheet(path: string) {
+    const workbook = readFile(path, {
+      WTF: true,
+      cellHTML: false,
+      cellText: false,
+    });
+    if (!workbook) {
       throw new Error(
         '워크북이 로드되지 않았습니다. setSourcePath를 먼저 호출하세요.'
       );
     }
-    return this.workbook.Sheets['칼로리및알레르기공시'];
+    return workbook.Sheets['칼로리및알레르기공시'];
   }
 
   private parseSheet(sheet: WorkSheet): WeeklyDataDto {
@@ -114,8 +115,8 @@ class XlsxToJsonMealParser implements MealParser {
     return menus;
   }
 
-  parse(): WeeklyDataDto {
-    return this.parseSheet(this.readSheet());
+  parse(path: string): WeeklyDataDto {
+    return this.parseSheet(this.readSheet(path));
   }
 }
 

@@ -1,26 +1,24 @@
-import { AttachmentDto } from '@/domain/types';
+import { CourseListDisplayData } from '@/domain/types';
 import Course from './Course';
-import { MenuIndices } from './MenuInfo';
 
 class CourseList {
-  constructor(private courses: Course[], indices: MenuIndices) {}
+  constructor(private courses: Course[]) {}
 
-  toAttachments(isLunch: boolean): AttachmentDto[] {
+  private getTitle(isLunch: boolean) {
     const date = new Date();
     const month = date.getMonth() + 1;
     const dateNumber = date.getDate();
-    const title = isLunch ? '오늘의 점심 메뉴' : '오늘의 저녁 메뉴';
+    return `${month}/${dateNumber} - ${
+      isLunch ? '오늘의 점심 메뉴' : '오늘의 저녁 메뉴'
+    }`;
+  }
 
-    // 메뉴가 있는 코스만 필터링하고 Attachment로 변환
-    const courseAttachments = this.courses
+  toDisplayData(isLunch: boolean): CourseListDisplayData {
+    const courses = this.courses
       .filter((course) => course.hasMenus())
-      .map((course) => course.toAttachment());
+      .map((course) => course.toDisplayData());
 
-    // 제목 Attachment와 코스 Attachment 배열 합치기
-    return [
-      { title: `${month}/${dateNumber} - ${title}` },
-      ...courseAttachments,
-    ];
+    return { title: this.getTitle(isLunch), courses };
   }
 }
 

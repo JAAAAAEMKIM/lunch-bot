@@ -1,11 +1,7 @@
 import { chromium } from 'playwright';
 import { test } from '@playwright/test';
 import dotenv from 'dotenv';
-import XlsxToJsonMealParser from '@/infrastructure/adapters/XlsxToJsonMealParser';
-import { JsonMealRepository } from '@/infrastructure/repository/JsonMealRepository';
-import { CrawlController } from '@/application/controllers/CrawlController';
-
-import { CrawlServiceAdapter } from '@/infrastructure/adapters/CrawlServiceAdapter';
+import App from '@/App';
 
 dotenv.config();
 
@@ -45,16 +41,9 @@ test('crawl menu sheet', async () => {
     throw new Error('다운로드 파일 경로를 찾을 수 없습니다.');
   }
 
-  // 리포지토리와 서비스 생성
-  const mealRepository = new JsonMealRepository(
-    process.env.DEFAULT_LUNCH_JSON_PATH ?? ''
-  );
-  const mealParser = new XlsxToJsonMealParser();
-  const crawlService = new CrawlServiceAdapter(mealRepository, mealParser);
-
-  // 컨트롤러를 통해 데이터 처리
-  const crawlController = new CrawlController(crawlService);
-  const result = await crawlController.processFile();
+  // 앱 인스턴스를 통해 유스케이스 직접 호출
+  const app = App.getInstance();
+  const result = await app.crawlAndSaveMealData();
 
   if (result) {
     console.log('식단 데이터가 성공적으로 저장되었습니다.');

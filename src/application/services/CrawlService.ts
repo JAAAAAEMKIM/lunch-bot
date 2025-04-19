@@ -1,8 +1,7 @@
-import { MealRepository } from '@/application/repository/MealRepository';
 import { MealParser } from '@/application/ports/MealParser';
-import { CrawlService } from '@/application/ports/CrawlService';
+import { MealRepository } from '@/application/repository/MealRepository';
 
-export class CrawlServiceAdapter implements CrawlService {
+class CrawlService {
   constructor(
     private mealRepository: MealRepository,
     private parser: MealParser
@@ -19,3 +18,5 @@ export class CrawlServiceAdapter implements CrawlService {
     }
   }
 }
+
+export default CrawlService;

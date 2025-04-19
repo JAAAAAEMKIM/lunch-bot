@@ -1,4 +1,4 @@
-import { CrawlService } from '@/application/ports/CrawlService';
+import CrawlService from '@/application/services/CrawlService';
 
 /**
  * 크롤링된 데이터를 처리하는 컨트롤러

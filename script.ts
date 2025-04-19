@@ -1,8 +1,5 @@
 import dotenv from 'dotenv';
-import { MealController } from '@/application/controllers/MealController';
-import { JsonMealRepository } from '@/infrastructure/repository/JsonMealRepository';
-import { DoorayMessageAdapter } from '@/infrastructure/adapters/DoorayMessageAdapter';
-import { MealServiceAdapter } from '@/infrastructure/adapters/MealServiceAdapter';
+import App from '@/App';
 
 // 환경 변수 로드
 dotenv.config();
@@ -18,26 +15,18 @@ const start = async () => {
     const isDinner = Boolean(flags.find((f) => f === '--dinner'));
     const isChannel2 = Boolean(flags.find((f) => f === '--chan2'));
 
-    // 의존성 초기화
-    const mealRepository = new JsonMealRepository(
-      process.env.DEFAULT_LUNCH_JSON_PATH ?? './lunch.json'
-    );
-    const messageService = new DoorayMessageAdapter();
-    const mealService = new MealServiceAdapter();
+    // 앱 인스턴스 가져오기
+    const app = App.getInstance();
 
-    // 컨트롤러 생성 및 실행
-    const mealController = new MealController(
-      mealRepository,
-      messageService,
-      mealService
-    );
-
-    // 식단 메시지 전송
-    await mealController.sendDailyMealMessage(
+    // 컨텍스트 설정과 메시지 전송을 분리하여 책임 분리
+    app.setContext({
       isDev,
       isDinner,
-      isChannel2 ? 2 : 1
-    );
+      channelNumber: isChannel2 ? 2 : 1,
+    });
+
+    // 설정된 컨텍스트에 따라 메시지 전송
+    await app.sendDailyMealMessage();
 
     console.log('식단 전송이 완료되었습니다.');
   } catch (error) {

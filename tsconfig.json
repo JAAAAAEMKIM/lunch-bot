@@ -23,5 +23,14 @@
       "@/*": ["src/*"]
     }
   },
-  "include": ["src/**/*", "automation/**/*", "lunch.json", "script.ts"]
+  "include": [
+    "src/**/*",
+    "automation/**/*",
+    "lunch.json",
+    "script.ts",
+    "parser/CourseList.ts",
+    "parser/XlsxFile.ts",
+    "parser/XlsxFile.test.js"
+  ],
+  "exclude": ["dist/**/*"]
 }

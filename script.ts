@@ -1,58 +1,50 @@
-import { sendMessage } from "@/ApiService";
-import MealData, { MEAL } from "@/MealData";
-import State from "@/State";
-import data from "./lunch.json";
-import CourseList from "@/CourseList";
-import { BOT_API_URL } from "@/constants";
+import dotenv from 'dotenv';
+import { MealController } from '@/application/controllers/MealController';
+import { JsonMealRepository } from '@/infrastructure/repository/JsonMealRepository';
+import { DoorayMessageAdapter } from '@/infrastructure/adapters/DoorayMessageAdapter';
+import { MealServiceAdapter } from '@/infrastructure/adapters/MealServiceAdapter';
 
-const getToday = () => {
-  const date = new Date();
-  if (date.getDay() === 0) {
-    return 7;
-  }
-  return date.getDay() - 1;
-};
+// 환경 변수 로드
+dotenv.config();
 
+/**
+ * 애플리케이션 시작 함수
+ */
 const start = async () => {
-  const flags = process.argv.slice(2);
-  const state = State.getInstance();
-  state.set({
-    isDev: Boolean(flags.find((f) => f === "--dev")) || false,
-    meal: Boolean(flags.find((f) => f === "--dinner"))
-      ? MEAL.DINNER
-      : MEAL.LUNCH,
-    channel: Boolean(flags.find((f) => f === "--chan2")) ? 2 : 1,
-  });
+  try {
+    // 명령줄 인자 파싱
+    const flags = process.argv.slice(2);
+    const isDev = Boolean(flags.find((f) => f === '--dev'));
+    const isDinner = Boolean(flags.find((f) => f === '--dinner'));
+    const isChannel2 = Boolean(flags.find((f) => f === '--chan2'));
 
-  const today = getToday();
+    // 의존성 초기화
+    const mealRepository = new JsonMealRepository(
+      process.env.DEFAULT_LUNCH_JSON_PATH ?? './lunch.json'
+    );
+    const messageService = new DoorayMessageAdapter();
+    const mealService = new MealServiceAdapter();
 
-  if (today > 4) {
-    console.log("weekend");
-    return;
+    // 컨트롤러 생성 및 실행
+    const mealController = new MealController(
+      mealRepository,
+      messageService,
+      mealService
+    );
+
+    // 식단 메시지 전송
+    await mealController.sendDailyMealMessage(
+      isDev,
+      isDinner,
+      isChannel2 ? 2 : 1
+    );
+
+    console.log('식단 전송이 완료되었습니다.');
+  } catch (error) {
+    console.error('에러가 발생했습니다:', error);
+    process.exit(1);
   }
-
-  const isLunch = state.meal === MEAL.LUNCH;
-  const mealData = new MealData(data);
-  const meal = isLunch
-    ? mealData.getByDay(today).lunch
-    : mealData.getByDay(today).dinner;
-
-  const attachments = new CourseList(meal).toAttachments(isLunch);
-
-  const url = state.isDev
-    ? BOT_API_URL.TEST
-    : state.channel === 1
-      ? BOT_API_URL.FE
-      : BOT_API_URL.GROUP;
-
-  if (!url) {
-    throw Error("No URL found.");
-  }
-
-  await sendMessage(url, attachments);
-
-  console.log(attachments);
-  console.log("END");
 };
 
+// 애플리케이션 시작
 start();

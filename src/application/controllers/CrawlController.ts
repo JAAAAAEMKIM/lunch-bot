@@ -7,9 +7,11 @@ import CrawlService from '@/application/services/CrawlService';
 export class CrawlController {
   constructor(private crawlService: CrawlService) {}
 
-  async processFile() {
-    await this.crawlService.saveWeeklyMeals();
-
-    return true;
+  async processFile(path: string) {
+    try {
+      return await this.crawlService.saveWeeklyMeals(path);
+    } catch (error) {
+      throw new Error(`파일 저장 중 오류가 발생했습니다., ${error}`);
+    }
   }
 }

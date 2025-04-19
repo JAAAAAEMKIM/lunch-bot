@@ -15,14 +15,11 @@ const start = async () => {
     const isDinner = Boolean(flags.find((f) => f === '--dinner'));
     const isChannel2 = Boolean(flags.find((f) => f === '--chan2'));
 
-    // 앱 인스턴스 가져오기
     const app = App.getInstance();
-
-    // 컨텍스트 설정과 메시지 전송을 분리하여 책임 분리
-    app.setContext({
+    app.setConfig({
       isDev,
-      isDinner,
-      channelNumber: isChannel2 ? 2 : 1,
+      isLunch: !isDinner,
+      channel: isDev ? 0 : isChannel2 ? 2 : 1,
     });
 
     // 설정된 컨텍스트에 따라 메시지 전송

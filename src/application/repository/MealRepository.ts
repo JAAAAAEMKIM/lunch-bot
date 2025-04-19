@@ -12,7 +12,7 @@ export interface MealRepository {
 
   /**
    * 주간 식단 데이터를 저장합니다.
-   * @param data 저장할 주간 식단 데이터
+   * @param path 저장할 경로
    */
-  saveWeeklyMeals(data: WeeklyDataDto): Promise<void>;
+  saveWeeklyMeals(path: string): Promise<void>;
 }

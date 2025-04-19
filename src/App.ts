@@ -2,12 +2,10 @@ import { MealController } from '@/application/controllers/MealController';
 import { CrawlController } from '@/application/controllers/CrawlController';
 import { JsonMealRepository } from '@/infrastructure/repository/JsonMealRepository';
 import { DoorayMessageAdapter } from '@/infrastructure/adapters/DoorayMessageAdapter';
-import { MealServiceAdapter } from '@/infrastructure/adapters/MealServiceAdapter';
 import { SendDailyMealService } from '@/application/services/SendDailyMealService';
 import CrawlService from '@/application/services/CrawlService';
-import XlsxToJsonMealParser from '@/infrastructure/adapters/XlsxToJsonMealParser';
-import ApplicationContext from './application/ApplicationContext';
-import { MEAL } from '@/domain/constants';
+import XlsxToJsonMealParser from '@/infrastructure/repository/parser/XlsxToJsonMealParser';
+import Config from '@/infrastructure/Config';
 
 /**
  * 애플리케이션의 중앙 진입점 역할을 하는 DI Container 클래스
@@ -18,24 +16,25 @@ class App {
 
   private mealController: MealController;
   private crawlController: CrawlController;
+  private config: Config;
 
   private constructor() {
     const lunchJsonPath = process.env.DEFAULT_LUNCH_JSON_PATH ?? './lunch.json';
-    const mealRepository = new JsonMealRepository(lunchJsonPath);
+
+    const mealParser = new XlsxToJsonMealParser();
+    const mealRepository = new JsonMealRepository(lunchJsonPath, mealParser);
 
     const messageService = new DoorayMessageAdapter();
-    const mealService = new MealServiceAdapter();
-    const mealParser = new XlsxToJsonMealParser();
 
     const sendDailyMealService = new SendDailyMealService(
       mealRepository,
-      messageService,
-      mealService
+      messageService
     );
-    const crawlService = new CrawlService(mealRepository, mealParser);
+    const crawlService = new CrawlService(mealRepository);
 
     this.mealController = new MealController(sendDailyMealService);
     this.crawlController = new CrawlController(crawlService);
+    this.config = Config.getInstance();
   }
 
   static getInstance(): App {
@@ -45,29 +44,23 @@ class App {
     return App.instance;
   }
 
-  setContext(options: {
-    isDev?: boolean;
-    isDinner?: boolean;
-    channelNumber?: 1 | 2;
+  setConfig(options: {
+    isDev: boolean;
+    isLunch: boolean;
+    channel: 0 | 1 | 2;
   }): void {
-    const context = ApplicationContext.getInstance();
-    context.set({
-      isDev: options.isDev ?? context.isDev,
-      meal: options.isDinner ? MEAL.DINNER : MEAL.LUNCH,
-      channel: options.channelNumber ?? context.channel,
-    });
+    this.config.isDev = options.isDev;
+    this.config.isLunch = options.isLunch;
+    this.config.channel = options.channel;
   }
 
   async sendDailyMealMessage(): Promise<void> {
-    // 컨텍스트 기반으로 메일 메시지 전송
-    await this.mealController.sendDailyMealMessage();
+    await this.mealController.sendDailyMealMessage(this.config.isLunch);
   }
 
-  async crawlAndSaveMealData(): Promise<boolean> {
-    return await this.crawlController.processFile();
+  async crawlAndSaveMealData(path: string) {
+    return this.crawlController.processFile(path);
   }
-
-  // 테스트를 위한 메서드들
 
   /**
    * 테스트에서 사용할 모의 의존성 주입

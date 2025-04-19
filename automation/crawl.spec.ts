@@ -43,12 +43,14 @@ test('crawl menu sheet', async () => {
 
   // 앱 인스턴스를 통해 유스케이스 직접 호출
   const app = App.getInstance();
-  const result = await app.crawlAndSaveMealData();
 
-  if (result) {
+  try {
+    const result = await app.crawlAndSaveMealData(path);
     console.log('식단 데이터가 성공적으로 저장되었습니다.');
-  } else {
-    console.error('식단 데이터 저장에 실패했습니다.');
+  } catch (error) {
+    if (error instanceof Error) {
+      console.error(error.message);
+    }
   }
 
   await browser.close();

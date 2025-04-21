@@ -28,8 +28,8 @@ const convertStandardMenus = (menus: MenuDisplayData[]) => {
 const convertLunchboxMenus = (menus: MenuDisplayData[]) => {
   return menus
     .map((menu) => {
-      const caloryText = menu.calory ? `\n${menu.calory.toFixed(2)} kcal}` : '';
-      const proteinText = menu.protein ? `/ ${menu.protein.toFixed(2)}g` : '';
+      const caloryText = menu.calory ? `\n${menu.calory.toFixed(2)} kcal` : '';
+      const proteinText = menu.protein ? ` / ${menu.protein.toFixed(2)}g` : '';
 
       return `${menu.name}${caloryText}${proteinText}`;
     })

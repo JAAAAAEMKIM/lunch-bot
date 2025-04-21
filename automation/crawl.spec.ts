@@ -45,7 +45,7 @@ test('crawl menu sheet', async () => {
   const app = App.getInstance();
 
   try {
-    const result = await app.crawlAndSaveMealData(path);
+    await app.crawlAndSaveMealData(path);
     console.log('식단 데이터가 성공적으로 저장되었습니다.');
   } catch (error) {
     if (error instanceof Error) {

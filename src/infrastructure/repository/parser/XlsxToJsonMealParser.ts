@@ -20,7 +20,7 @@ class XlsxToJsonMealParser implements MealParser {
     const calory = menuRow[CALORY_IDX];
     const protein = menuRow[PROTEIN_IDX];
     return {
-      name: String(menuRow[NAME_IDX] || ''),
+      name: String(menuRow[NAME_IDX] || '').trim(),
       calory: calory ? Number(calory) : undefined,
       protein: protein ? Number(protein) : undefined,
     };
@@ -51,7 +51,7 @@ class XlsxToJsonMealParser implements MealParser {
         continue;
       }
       const menuRow = data[row].slice(columnStart, columnStart + COLUMN_COUNT);
-      const menu = String(menuRow[0] || '');
+      const menu = String(menuRow[0] || '').trim();
 
       if (curCourse.label === 'PLUS') {
         if (!menu) continue;

@@ -30,7 +30,7 @@ export class SendDailyMealService {
     // 첨부파일 생성
     const courseList = new CourseList(courses);
     const contents = courseList.toDisplayData(isLunch);
-    const title = getRandomEmoji();
+    const title = getRandomEmoji(5);
 
     // 메시지 전송
     await this.messageService.sendMessage(title, contents);

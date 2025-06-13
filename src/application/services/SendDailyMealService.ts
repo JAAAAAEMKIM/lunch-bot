@@ -1,4 +1,5 @@
 import { MessageService } from '@/application/ports/MessageService';
+import { ImageRepository } from '@/application/repository/ImageRepository';
 import { MealRepository } from '@/application/repository/MealRepository';
 import { getRandomEmoji } from '@/application/utils/emoji';
 import CourseList from '@/domain/model/CourseList';
@@ -10,6 +11,7 @@ import Today from '@/domain/model/Today';
 export class SendDailyMealService {
   constructor(
     private mealRepository: MealRepository,
+    private imageRepository: ImageRepository,
     private messageService: MessageService
   ) {}
 
@@ -27,9 +29,18 @@ export class SendDailyMealService {
     const todayMeals = weeklyData.at(today.index);
     const courses = isLunch ? todayMeals.lunch : todayMeals.dinner;
 
+    await Promise.all(
+      courses.map(async (course) =>
+        course.setImageUrl(
+          await this.imageRepository.getByTitle(course.mainMenu)
+        )
+      )
+    );
+
     // 첨부파일 생성
     const courseList = new CourseList(courses);
     const contents = courseList.toDisplayData(isLunch);
+    console.log(contents);
     const title = getRandomEmoji(5);
 
     // 메시지 전송

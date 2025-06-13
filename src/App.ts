@@ -6,6 +6,8 @@ import { SendDailyMealService } from '@/application/services/SendDailyMealServic
 import CrawlService from '@/application/services/CrawlService';
 import XlsxToJsonMealParser from '@/infrastructure/repository/parser/XlsxToJsonMealParser';
 import Config from '@/infrastructure/Config';
+import MockImageRepository from '@/infrastructure/repository/MockImageRepository';
+import PaycoImageRepository from '@/infrastructure/repository/PaycoImageRepository';
 
 /**
  * 애플리케이션의 중앙 진입점 역할을 하는 DI Container 클래스
@@ -23,11 +25,13 @@ class App {
 
     const mealParser = new XlsxToJsonMealParser();
     const mealRepository = new JsonMealRepository(lunchJsonPath, mealParser);
+    const imageRepository = new PaycoImageRepository();
 
     const messageService = new DoorayMessageAdapter();
 
     const sendDailyMealService = new SendDailyMealService(
       mealRepository,
+      imageRepository,
       messageService
     );
     const crawlService = new CrawlService(mealRepository);

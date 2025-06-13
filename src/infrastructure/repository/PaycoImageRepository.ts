@@ -39,8 +39,6 @@ class PaycoImageRepository implements ImageRepository {
       await this.init();
     }
 
-    console.log(title, this.imageMap?.[title]);
-
     return this.imageMap?.[title] ?? '';
   }
 }

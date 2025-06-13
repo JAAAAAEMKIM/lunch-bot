@@ -1,7 +1,9 @@
 import dotenv from 'dotenv';
 
 // .env 파일 로드
-dotenv.config();
+dotenv.config({ path: process.env.ENV_PATH });
+
+console.log(process.env.ENV_PATH);
 
 export const COURSE_REGEX = /코스.*/;
 export const PLUS_REGEX = /^Plus.*/;

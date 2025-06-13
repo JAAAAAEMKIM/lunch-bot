@@ -1,6 +1,10 @@
+/*! formdata-polyfill. MIT License. Jimmy Wärting <https://jimmy.warting.se/opensource> */
+
 /*! node-domexception. MIT License. Jimmy Wärting <https://jimmy.warting.se/opensource> */
 
 /*! sheetjs (C) 2013-present SheetJS -- http://sheetjs.com */
+
+/*! ws. MIT License. Einar Otto Stangvik <einaros@gmail.com> */
 
 /*! xlsx.js (C) 2013-present SheetJS -- http://sheetjs.com */
 

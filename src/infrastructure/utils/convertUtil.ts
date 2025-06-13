@@ -4,7 +4,7 @@ import { CourseDisplayData, MenuDisplayData } from '@/domain/types';
 export type AttachmentDto = {
   title: string;
   text?: string;
-  imageurl?: string;
+  image?: string;
 };
 
 const convertPlusMenus = (menus: MenuDisplayData[]) => {
@@ -51,6 +51,7 @@ export const convertCourseToAttachment = ({
   title,
   menus,
   type,
+  imageUrl,
 }: CourseDisplayData): AttachmentDto => {
-  return { title: title, text: getConverter(type)(menus) };
+  return { title: title, text: getConverter(type)(menus), image: imageUrl };
 };

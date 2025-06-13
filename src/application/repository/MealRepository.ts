@@ -1,5 +1,4 @@
 import WeeklyData from '@/domain/model/WeeklyData';
-import { WeeklyDataDto } from '@/domain/types';
 
 /**
  * 식단 데이터에 대한 접근을 정의하는 리포지토리 인터페이스

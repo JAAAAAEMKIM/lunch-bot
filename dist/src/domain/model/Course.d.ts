@@ -5,9 +5,12 @@ import { CourseDisplayData, MenuInfoDto } from '@/domain/types';
 declare class Course {
     private label;
     private menus;
+    private imageUrl?;
     constructor(label: string, menus: MenuInfoDto[]);
     private get type();
     private get title();
+    get mainMenu(): string;
+    setImageUrl(url: string): void;
     hasMenus(): boolean;
     toDisplayData(): CourseDisplayData;
 }

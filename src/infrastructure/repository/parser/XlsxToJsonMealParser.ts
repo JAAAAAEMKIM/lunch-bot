@@ -1,4 +1,4 @@
-import XLSX, { WorkSheet, readFile } from 'xlsx';
+import { WorkSheet, readFile, utils as xlsxUtils } from 'xlsx';
 
 import { MealParser } from '@/infrastructure/repository/parser/MealParser';
 import {
@@ -89,7 +89,7 @@ class XlsxToJsonMealParser implements MealParser {
   }
 
   private parseSheet(sheet: WorkSheet): WeeklyDataDto {
-    const data = XLSX.utils.sheet_to_json<(string | number)[]>(sheet, {
+    const data = xlsxUtils.sheet_to_json<(string | number)[]>(sheet, {
       header: 1,
     });
     const categories = data.map((row) => row[CATEGORY_IDX]);

@@ -17,6 +17,7 @@ export type CourseDisplayData = {
     title: string;
     menus: MenuDisplayData[];
     type: COURSE_TYPE;
+    imageUrl?: string;
 };
 export type CourseDto = {
     label: string;
